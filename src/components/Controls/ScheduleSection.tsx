@@ -1,23 +1,19 @@
 import React, { useState } from 'react';
-import { Clock, ChevronDown, ChevronUp, Palette, Type } from 'lucide-react';
-import type { ScheduleInfo, PosterTheme, PosterTextSize } from '../../types/poster';
+import { Clock, ChevronDown, ChevronUp, Palette } from 'lucide-react';
+import type { ScheduleInfo, PosterTheme } from '../../types/poster';
 
 interface ScheduleSectionProps {
   schedule: ScheduleInfo;
   theme: PosterTheme;
-  textSize: PosterTextSize;
   onChangeSchedule: (schedule: ScheduleInfo) => void;
   onChangeTheme: (theme: PosterTheme) => void;
-  onChangeTextSize: (size: PosterTextSize) => void;
 }
 
 export const ScheduleSection: React.FC<ScheduleSectionProps> = ({
   schedule,
   theme,
-  textSize,
   onChangeSchedule,
   onChangeTheme,
-  onChangeTextSize,
 }) => {
   const [showAdvanced, setShowAdvanced] = useState(false);
 
@@ -145,41 +141,6 @@ export const ScheduleSection: React.FC<ScheduleSectionProps> = ({
         />
       </div>
 
-      {/* WhatsApp Text Size Selector */}
-      <div className="field-group" style={{ marginTop: '2px' }}>
-        <label style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-          <span style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
-            <Type size={13} style={{ color: 'var(--accent)' }} />
-            Tamaño de Textos (WhatsApp)
-          </span>
-          <span style={{ fontSize: '0.74rem', color: 'var(--accent)', fontWeight: 700, letterSpacing: '0.5px' }}>
-            {textSize === 'xlarge' ? 'Extra Grande' : textSize === 'large' ? 'Grande (WhatsApp)' : 'Normal'}
-          </span>
-        </label>
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1.2fr 1.2fr', gap: '6px' }}>
-          <button
-            type="button"
-            className={`btn-size ${textSize === 'normal' ? 'active' : ''}`}
-            onClick={() => onChangeTextSize('normal')}
-          >
-            Normal
-          </button>
-          <button
-            type="button"
-            className={`btn-size ${textSize === 'large' ? 'active' : ''}`}
-            onClick={() => onChangeTextSize('large')}
-          >
-            Grande ★
-          </button>
-          <button
-            type="button"
-            className={`btn-size ${textSize === 'xlarge' ? 'active' : ''}`}
-            onClick={() => onChangeTextSize('xlarge')}
-          >
-            Extra Grande
-          </button>
-        </div>
-      </div>
 
       {/* Advanced Poster Customization (Badge & Headline) */}
       <div style={{ marginTop: '4px', borderTop: '1px solid #2d313d', paddingTop: '8px' }}>

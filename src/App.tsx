@@ -79,7 +79,7 @@ export const App: React.FC = () => {
   const [schedule, setSchedule] = useState<ScheduleInfo>(DEFAULT_SCHEDULE);
   const [theme, setTheme] = useState<PosterTheme>(DEFAULT_THEME);
   const [adjustment, setAdjustment] = useState<ImageAdjustment>(DEFAULT_ADJUSTMENT);
-  const [textSize, setTextSize] = useState<PosterTextSize>('large');
+  const textSize: PosterTextSize = 'large';
   const [isAdjusting, setIsAdjusting] = useState<boolean>(false);
 
   // Saved Posters Panel & Local Storage state
@@ -240,7 +240,6 @@ export const App: React.FC = () => {
     setSchedule(project.schedule);
     setTheme(project.theme);
     setAdjustment(project.adjustment || DEFAULT_ADJUSTMENT);
-    setTextSize(project.textSize || 'large');
     setCurrentProjectId(project.id);
     setIsAdjusting(false);
 
@@ -274,7 +273,6 @@ export const App: React.FC = () => {
     });
     setAdjustment(DEFAULT_ADJUSTMENT);
     setIsAdjusting(false);
-    setTextSize('large');
     setCurrentProjectId(null);
 
     localStorage.setItem('homecinema_session_number', String(nextSession));
@@ -339,7 +337,6 @@ export const App: React.FC = () => {
     });
     setAdjustment(DEFAULT_ADJUSTMENT);
     setIsAdjusting(false);
-    setTextSize('large');
     setCurrentProjectId(null);
     showToast('Plantilla restablecida');
   };
@@ -377,10 +374,8 @@ export const App: React.FC = () => {
           <ScheduleSection
             schedule={schedule}
             theme={theme}
-            textSize={textSize}
             onChangeSchedule={setSchedule}
             onChangeTheme={setTheme}
-            onChangeTextSize={setTextSize}
           />
 
           <ExportSection
