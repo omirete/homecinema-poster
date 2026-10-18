@@ -1,5 +1,11 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import type { MovieMetadata, ScheduleInfo, PosterTheme, ImageAdjustment } from '../../types/poster';
+import type {
+  MovieMetadata,
+  ScheduleInfo,
+  PosterTheme,
+  ImageAdjustment,
+  PosterTextSize,
+} from '../../types/poster';
 import './PosterPreview.css';
 
 interface PosterPreviewProps {
@@ -8,6 +14,7 @@ interface PosterPreviewProps {
   schedule: ScheduleInfo;
   theme: PosterTheme;
   adjustment: ImageAdjustment;
+  textSize?: PosterTextSize;
 }
 
 const CANONICAL_WIDTH = 520;
@@ -19,6 +26,7 @@ export const PosterPreview: React.FC<PosterPreviewProps> = ({
   schedule,
   theme,
   adjustment,
+  textSize = 'large',
 }) => {
   const calculateFitScale = useCallback(() => {
     if (typeof window === 'undefined') return 0.78;
@@ -60,6 +68,12 @@ export const PosterPreview: React.FC<PosterPreviewProps> = ({
     }
   };
 
+  const [corsFailed, setCorsFailed] = useState<boolean>(false);
+
+  useEffect(() => {
+    setCorsFailed(false);
+  }, [metadata.posterUrl]);
+
   return (
     <div className="preview-area" onWheel={handleWheel}>
       <div className="preview-indicator">
@@ -75,7 +89,7 @@ export const PosterPreview: React.FC<PosterPreviewProps> = ({
         }}
       >
         <div
-          className="poster-canvas"
+          className={`poster-canvas text-${textSize}`}
           id="poster"
           ref={posterRef}
           style={{
@@ -89,7 +103,12 @@ export const PosterPreview: React.FC<PosterPreviewProps> = ({
             id="posterImg"
             src={metadata.posterUrl}
             alt={metadata.title}
-            crossOrigin="anonymous"
+            crossOrigin={metadata.posterUrl?.startsWith('data:') ? undefined : corsFailed ? undefined : 'anonymous'}
+            onError={() => {
+              if (!corsFailed) {
+                setCorsFailed(true);
+              }
+            }}
             style={{
               objectPosition: `center ${adjustment.posY}%`,
               transform: `scale(${adjustment.scale})`,
@@ -107,7 +126,18 @@ export const PosterPreview: React.FC<PosterPreviewProps> = ({
         {/* Lower Details & Ticket */}
         <div className="poster-footer">
           <div className="movie-title-box">
-            <h2 className="movie-title" id="outTitle">
+            <h2
+              className="movie-title"
+              id="outTitle"
+              style={{
+                fontSize:
+                  (metadata.title || '').length > 32
+                    ? '2.4rem'
+                    : (metadata.title || '').length > 20
+                    ? '2.85rem'
+                    : '3.3rem',
+              }}
+            >
               {metadata.title || 'SIN TÍTULO'}
             </h2>
             <div className="movie-metadata">
@@ -120,27 +150,35 @@ export const PosterPreview: React.FC<PosterPreviewProps> = ({
             </div>
           </div>
 
-          <div className="schedule-ticket">
-            <div className="time-slot">
-              <span className="time-label">Puertas</span>
-              <span className="time-val" id="outDoors">
-                {schedule.doorsTime}
-              </span>
+          <div className={`schedule-ticket ${!schedule.reminderText?.trim() ? 'no-reminder' : ''}`}>
+            <div className="ticket-times">
+              <div className="time-slot">
+                <span className="time-label">Puertas</span>
+                <span className="time-val" id="outDoors">
+                  {schedule.doorsTime}
+                </span>
+              </div>
+              <div className="ticket-divider">|</div>
+              <div className="time-slot">
+                <span className="time-label">Función</span>
+                <span className="time-val" id="outShow" style={{ color: 'var(--poster-gold)' }}>
+                  {schedule.showTime}
+                </span>
+              </div>
             </div>
-            <div className="ticket-divider">|</div>
-            <div className="time-slot">
-              <span className="time-label">Función</span>
-              <span className="time-val" id="outShow" style={{ color: 'var(--poster-gold)' }}>
-                {schedule.showTime}
-              </span>
-            </div>
-            <div className="snack-reminder" id="outReminder">
-              {schedule.reminderText}
-            </div>
+            {schedule.reminderText && schedule.reminderText.trim() !== '' && (
+              <div className="snack-reminder" id="outReminder">
+                {schedule.reminderText}
+              </div>
+            )}
           </div>
 
           <div className="film-strip-credits">
-            <span>{theme.footerLeft}</span>
+            <span id="outEdition">
+              {theme.sessionNumber !== undefined && theme.sessionNumber !== ''
+                ? `NO. ${String(theme.sessionNumber).padStart(4, '0')}`
+                : theme.footerLeft || ''}
+            </span>
             <span>{theme.footerCenter}</span>
             <span>{theme.footerRight}</span>
           </div>

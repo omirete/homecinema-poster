@@ -1,16 +1,17 @@
 import React, { useState } from 'react';
-import { Search, Loader2 } from 'lucide-react';
+import { Search, Loader2, Check, Film, Image as ImageIcon } from 'lucide-react';
 import type { MovieSearchResult } from '../../types/poster';
-import { searchMovies, getHighResArtwork } from '../../services/movieApi';
+import { searchMovies } from '../../services/movieApi';
 
 interface MovieSearchSectionProps {
-  onSelectMovie: (movie: MovieSearchResult, highResUrl: string) => void;
+  onSelectMovie: (movie: MovieSearchResult, chosenArtworkUrl: string) => void;
 }
 
 export const MovieSearchSection: React.FC<MovieSearchSectionProps> = ({ onSelectMovie }) => {
   const [query, setQuery] = useState('');
   const [results, setResults] = useState<MovieSearchResult[]>([]);
   const [selectedIndex, setSelectedIndex] = useState<number>(0);
+  const [selectedImageIndex, setSelectedImageIndex] = useState<number>(0);
   const [isLoading, setIsLoading] = useState(false);
   const [statusMessage, setStatusMessage] = useState('');
   const [isError, setIsError] = useState(false);
@@ -20,7 +21,7 @@ export const MovieSearchSection: React.FC<MovieSearchSectionProps> = ({ onSelect
     if (!cleanQuery) return;
 
     setIsLoading(true);
-    setStatusMessage('Buscando afiches y metadatos...');
+    setStatusMessage('Buscando afiches, escenas y metadatos...');
     setIsError(false);
 
     try {
@@ -31,11 +32,22 @@ export const MovieSearchSection: React.FC<MovieSearchSectionProps> = ({ onSelect
         setStatusMessage('No se encontraron películas. Podés ingresar los datos manualmente.');
         setIsError(false);
       } else {
-        setStatusMessage(`Se encontraron ${movies.length} afiches disponibles.`);
+        const totalImages = movies.reduce(
+          (sum, m) => sum + (m.availableImages?.length || 1),
+          0
+        );
+        setStatusMessage(
+          `Se encontraron ${movies.length} ${
+            movies.length === 1 ? 'película' : 'películas'
+          } con ${totalImages} imágenes disponibles.`
+        );
         setSelectedIndex(0);
-        // Automatically apply the first movie result
+        setSelectedImageIndex(0);
+
+        // Automatically apply the first movie result with its first available picture
         const first = movies[0];
-        onSelectMovie(first, getHighResArtwork(first.artworkUrl100));
+        const firstArtwork = first.availableImages?.[0]?.url || first.artworkUrl100;
+        onSelectMovie(first, firstArtwork);
       }
     } catch (err) {
       console.error(err);
@@ -52,10 +64,25 @@ export const MovieSearchSection: React.FC<MovieSearchSectionProps> = ({ onSelect
     }
   };
 
-  const handleSelect = (movie: MovieSearchResult, index: number) => {
+  const handleSelectMovieTab = (index: number) => {
+    const movie = results[index];
+    if (!movie) return;
     setSelectedIndex(index);
-    onSelectMovie(movie, getHighResArtwork(movie.artworkUrl100));
+    setSelectedImageIndex(0);
+    const chosenArtwork = movie.availableImages?.[0]?.url || movie.artworkUrl100;
+    onSelectMovie(movie, chosenArtwork);
   };
+
+  const handleSelectImage = (imgIndex: number) => {
+    const movie = results[selectedIndex];
+    if (!movie || !movie.availableImages?.[imgIndex]) return;
+    setSelectedImageIndex(imgIndex);
+    const chosenArtwork = movie.availableImages[imgIndex].url;
+    onSelectMovie(movie, chosenArtwork);
+  };
+
+  const currentMovie = results[selectedIndex];
+  const currentImages = currentMovie?.availableImages || [];
 
   return (
     <div className="control-card">
@@ -104,20 +131,75 @@ export const MovieSearchSection: React.FC<MovieSearchSectionProps> = ({ onSelect
         </div>
       )}
 
-      {results.length > 0 && (
+      {results.length > 0 && currentMovie && (
         <div className="gallery-wrapper" id="resultsWrapper">
-          <label>Elegí la carátula o versión que más te guste:</label>
-          <div className="results-gallery" id="resultsGallery">
-            {results.map((item, index) => (
-              <div
-                key={item.trackId || index}
-                className={`thumb-option ${index === selectedIndex ? 'selected' : ''}`}
-                onClick={() => handleSelect(item, index)}
-                title={item.trackName}
-              >
-                <img src={item.artworkUrl100} alt={item.trackName} loading="lazy" />
+          {/* Multiple Movie Matches Selector */}
+          {results.length > 1 && (
+            <div className="movie-results-selector">
+              <label className="sub-label">Películas encontradas:</label>
+              <div className="movie-chips-scroll">
+                {results.map((movie, idx) => (
+                  <button
+                    key={movie.trackId || idx}
+                    type="button"
+                    className={`movie-chip ${idx === selectedIndex ? 'active' : ''}`}
+                    onClick={() => handleSelectMovieTab(idx)}
+                  >
+                    <Film size={12} className="chip-icon" />
+                    <span className="chip-title">{movie.trackName}</span>
+                    {movie.releaseDate && (
+                      <span className="chip-year">
+                        ({movie.releaseDate.substring(0, 4)})
+                      </span>
+                    )}
+                    {movie.availableImages && movie.availableImages.length > 1 && (
+                      <span className="chip-badge">
+                        <ImageIcon size={10} />
+                        {movie.availableImages.length}
+                      </span>
+                    )}
+                  </button>
+                ))}
               </div>
-            ))}
+            </div>
+          )}
+
+          {/* Available Pictures for the Selected Movie */}
+          <div className="available-images-container">
+            <div className="gallery-header">
+              <label>
+                Imágenes de &quot;{currentMovie.trackName}&quot; (
+                {currentImages.length}{' '}
+                {currentImages.length === 1 ? 'disponible' : 'disponibles'}):
+              </label>
+            </div>
+
+            <div className="results-gallery" id="resultsGallery">
+              {currentImages.map((imgOpt, imgIdx) => (
+                <div
+                  key={`${imgOpt.url}-${imgIdx}`}
+                  className={`thumb-option image-card ${
+                    imgIdx === selectedImageIndex ? 'selected' : ''
+                  }`}
+                  onClick={() => handleSelectImage(imgIdx)}
+                  title={`${imgOpt.label} • ${currentMovie.trackName}`}
+                >
+                  <img
+                    src={imgOpt.previewUrl || imgOpt.url}
+                    alt={imgOpt.label}
+                    loading="lazy"
+                  />
+                  <div className="thumb-meta-overlay">
+                    <span className="thumb-label">{imgOpt.label}</span>
+                  </div>
+                  {imgIdx === selectedImageIndex && (
+                    <div className="thumb-check-badge">
+                      <Check size={11} strokeWidth={3} />
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
           </div>
         </div>
       )}

@@ -102,31 +102,34 @@
 .poster-header {
   position: relative;
   z-index: 10;
-  padding: 24px 24px 10px;
+  padding: 20px 24px 8px;
   text-align: center;
   background: linear-gradient(180deg, rgba(17, 16, 14, 0.95) 0%, rgba(17, 16, 14, 0.8) 70%, transparent 100%);
 }
 
 .poster-badge {
   display: inline-block;
-  font-size: 0.65rem;
-  letter-spacing: 3px;
+  font-size: 0.95rem;
+  font-weight: 800;
+  letter-spacing: 2.5px;
   text-transform: uppercase;
-  padding: 3px 12px;
-  border: 1px solid var(--poster-gold);
+  padding: 5px 16px;
+  border: 1.5px solid var(--poster-gold);
   color: var(--poster-gold);
   margin-bottom: 6px;
-  background: rgba(0, 0, 0, 0.6);
-  backdrop-filter: blur(2px);
+  background: rgba(14, 13, 12, 0.88);
+  backdrop-filter: blur(4px);
+  border-radius: 3px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.6);
 }
 
 .poster-headline {
   font-family: var(--font-poster-title);
-  font-size: 2.1rem;
-  letter-spacing: 4px;
+  font-size: 2.5rem;
+  letter-spacing: 2.5px;
   color: var(--poster-paper);
-  line-height: 1;
-  text-shadow: 2px 2px 0px rgba(0, 0, 0, 0.9);
+  line-height: 1.05;
+  text-shadow: 0 2px 6px rgba(0, 0, 0, 0.95);
 }
 
 /* Área central de imagen */
@@ -156,8 +159,14 @@
   bottom: 0;
   left: 0;
   width: 100%;
-  height: 62%;
-  background: linear-gradient(0deg, rgba(14, 13, 12, 1) 18%, rgba(14, 13, 12, 0.88) 48%, rgba(14, 13, 12, 0.35) 78%, transparent 100%);
+  height: 68%;
+  background: linear-gradient(
+    0deg,
+    rgba(14, 13, 12, 1) 25%,
+    rgba(14, 13, 12, 0.95) 58%,
+    rgba(14, 13, 12, 0.5) 84%,
+    transparent 100%
+  );
   z-index: 2;
   pointer-events: none;
 }
@@ -166,10 +175,10 @@
 .poster-footer {
   position: relative;
   z-index: 10;
-  padding: 20px 24px 22px;
+  padding: 14px 22px 18px;
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 10px;
 }
 
 .movie-title-box {
@@ -179,7 +188,7 @@
 
 .movie-title {
   font-family: var(--font-poster-title);
-  font-size: 3.2rem;
+  font-size: 3.3rem;
   letter-spacing: 2px;
   line-height: 0.95;
   color: #fff;
@@ -189,39 +198,66 @@
 }
 
 .movie-metadata {
-  font-size: 0.72rem;
-  letter-spacing: 1px;
+  font-size: 1.12rem;
+  font-weight: 800;
+  letter-spacing: 1.5px;
   color: var(--poster-gold);
   margin-top: 6px;
   display: flex;
   flex-wrap: wrap;
   gap: 8px;
+  align-items: center;
   text-transform: uppercase;
+  text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.95);
 }
 
 .movie-metadata span:not(:last-child)::after {
   content: " • ";
   margin-left: 8px;
-  color: rgba(244, 238, 225, 0.4);
+  color: rgba(244, 238, 225, 0.6);
+  font-weight: 400;
 }
 
 .movie-director {
-  font-size: 0.75rem;
-  color: var(--poster-paper);
-  margin-top: 3px;
-  font-style: italic;
+  font-size: 1.05rem;
+  color: rgba(244, 238, 225, 0.92);
+  margin-top: 4px;
+  font-style: normal;
+  letter-spacing: 0.4px;
+  text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.95);
+}
+
+.movie-director strong {
+  color: #fff;
+  font-size: 1.12rem;
+  font-weight: 800;
+  letter-spacing: 0.6px;
 }
 
 /* Ticket / Sección Horarios */
 .schedule-ticket {
-  background: rgba(244, 238, 225, 0.08);
-  border: 1px dashed rgba(244, 238, 225, 0.35);
-  border-radius: 4px;
+  background: rgba(18, 17, 15, 0.88);
+  border: 1.5px dashed rgba(201, 147, 62, 0.65);
+  border-radius: 6px;
   padding: 10px 14px;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  backdrop-filter: blur(4px);
+  backdrop-filter: blur(6px);
+  box-shadow: inset 0 0 14px rgba(0, 0, 0, 0.6), 0 4px 14px rgba(0, 0, 0, 0.5);
+  gap: 10px;
+}
+
+.schedule-ticket.no-reminder {
+  justify-content: center;
+  gap: 24px;
+}
+
+.ticket-times {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-shrink: 0;
 }
 
 .time-slot {
@@ -230,49 +266,128 @@
 }
 
 .time-label {
-  font-size: 0.6rem;
+  font-size: 0.92rem;
+  font-weight: 800;
   letter-spacing: 1.5px;
   text-transform: uppercase;
-  color: #aaa;
+  color: rgba(244, 238, 225, 0.9);
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.8);
+  margin-bottom: 1px;
 }
 
 .time-val {
   font-family: var(--font-poster-title);
-  font-size: 1.5rem;
-  letter-spacing: 1px;
+  font-size: 2.25rem;
+  letter-spacing: 1.5px;
   color: #fff;
   line-height: 1;
+  text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.95);
 }
 
 .ticket-divider {
-  color: rgba(244, 238, 225, 0.25);
-  font-size: 1.5rem;
+  color: rgba(244, 238, 225, 0.35);
+  font-size: 2.25rem;
   line-height: 1;
+  user-select: none;
 }
 
 .snack-reminder {
-  font-size: 0.72rem;
+  font-size: 1.08rem;
   background: var(--poster-accent);
   color: #fff;
-  padding: 5px 10px;
-  border-radius: 4px;
-  font-weight: 700;
+  padding: 10px 16px;
+  border-radius: 6px;
+  font-weight: 900;
   text-transform: uppercase;
-  letter-spacing: 0.5px;
+  letter-spacing: 0.6px;
   display: inline-block;
   text-align: center;
-  box-shadow: 0 2px 8px rgba(196, 50, 36, 0.4);
+  line-height: 1.25;
+  box-shadow: 0 3px 12px rgba(196, 50, 36, 0.55);
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.7);
+  max-width: 210px;
+  word-wrap: break-word;
 }
 
 /* Franja final técnica (simulando créditos de celuloide) */
 .film-strip-credits {
   display: flex;
   justify-content: space-between;
-  font-size: 0.55rem;
-  color: rgba(244, 238, 225, 0.45);
-  letter-spacing: 1px;
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: rgba(244, 238, 225, 0.85);
+  letter-spacing: 1.5px;
   text-transform: uppercase;
-  margin-top: 2px;
+  margin-top: 4px;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.8);
+}
+
+/* Modificadores de Tamaño para WhatsApp */
+.poster-canvas.text-normal .poster-badge {
+  font-size: 0.78rem;
+  padding: 4px 12px;
+}
+.poster-canvas.text-normal .poster-headline {
+  font-size: 2.15rem;
+}
+.poster-canvas.text-normal .movie-metadata {
+  font-size: 0.92rem;
+}
+.poster-canvas.text-normal .movie-director {
+  font-size: 0.88rem;
+}
+.poster-canvas.text-normal .movie-director strong {
+  font-size: 0.95rem;
+}
+.poster-canvas.text-normal .time-label {
+  font-size: 0.76rem;
+}
+.poster-canvas.text-normal .time-val {
+  font-size: 1.8rem;
+}
+.poster-canvas.text-normal .ticket-divider {
+  font-size: 1.8rem;
+}
+.poster-canvas.text-normal .snack-reminder {
+  font-size: 0.9rem;
+  padding: 8px 12px;
+}
+.poster-canvas.text-normal .film-strip-credits {
+  font-size: 0.72rem;
+}
+
+.poster-canvas.text-xlarge .poster-badge {
+  font-size: 1.12rem;
+  padding: 6px 20px;
+}
+.poster-canvas.text-xlarge .poster-headline {
+  font-size: 2.75rem;
+}
+.poster-canvas.text-xlarge .movie-metadata {
+  font-size: 1.25rem;
+  gap: 10px;
+}
+.poster-canvas.text-xlarge .movie-director {
+  font-size: 1.18rem;
+}
+.poster-canvas.text-xlarge .movie-director strong {
+  font-size: 1.25rem;
+}
+.poster-canvas.text-xlarge .time-label {
+  font-size: 1.05rem;
+}
+.poster-canvas.text-xlarge .time-val {
+  font-size: 2.55rem;
+}
+.poster-canvas.text-xlarge .ticket-divider {
+  font-size: 2.55rem;
+}
+.poster-canvas.text-xlarge .snack-reminder {
+  font-size: 1.22rem;
+  padding: 12px 18px;
+}
+.poster-canvas.text-xlarge .film-strip-credits {
+  font-size: 0.95rem;
 }
 
 @media (max-width: 1024px) {

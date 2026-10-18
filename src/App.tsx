@@ -5,6 +5,7 @@ import type {
   PosterTheme,
   ImageAdjustment,
   MovieSearchResult,
+  PosterTextSize,
 } from './types/poster';
 import { Header } from './components/Header/Header';
 import { MovieSearchSection } from './components/Controls/MovieSearchSection';
@@ -33,12 +34,26 @@ const DEFAULT_SCHEDULE: ScheduleInfo = {
   reminderText: '🍿 Traer para picar',
 };
 
+const getInitialSessionNumber = (): number => {
+  if (typeof window !== 'undefined') {
+    const saved = localStorage.getItem('homecinema_session_number');
+    if (saved !== null) {
+      const parsed = parseInt(saved, 10);
+      if (!isNaN(parsed) && parsed > 0) return parsed;
+    }
+  }
+  return 2;
+};
+
+const initialSession = getInitialSessionNumber();
+
 const DEFAULT_THEME: PosterTheme = {
   badgeText: 'Entrada gratis',
   headlineText: 'DOMINGO DE CINE EN CASA',
-  footerLeft: 'NO. 0002',
-  footerCenter: 'SONIDO STEREO // 35MM VIBES',
-  footerRight: 'NO SPOILERS',
+  footerLeft: `NO. ${String(initialSession).padStart(4, '0')}`,
+  footerCenter: '',
+  footerRight: 'Cupos limitados',
+  sessionNumber: initialSession,
 };
 
 const DEFAULT_ADJUSTMENT: ImageAdjustment = {
@@ -53,6 +68,7 @@ export const App: React.FC = () => {
   const [schedule, setSchedule] = useState<ScheduleInfo>(DEFAULT_SCHEDULE);
   const [theme, setTheme] = useState<PosterTheme>(DEFAULT_THEME);
   const [adjustment, setAdjustment] = useState<ImageAdjustment>(DEFAULT_ADJUSTMENT);
+  const [textSize, setTextSize] = useState<PosterTextSize>('large');
 
   const handleSelectMovie = async (movie: MovieSearchResult, highResArtworkUrl: string) => {
     let year = '';
@@ -72,7 +88,7 @@ export const App: React.FC = () => {
     const director = movie.artistName || 'Desconocido';
     const title = movie.trackName || '';
 
-    // Update metadata fields immediately
+    // Update metadata fields immediately AND posterUrl immediately so preview reflects the selection instantly!
     setMetadata((prev) => ({
       ...prev,
       title: title.toUpperCase(),
@@ -80,21 +96,25 @@ export const App: React.FC = () => {
       duration: duration.toUpperCase(),
       director,
       genre: genre.toUpperCase(),
+      posterUrl: highResArtworkUrl || prev.posterUrl,
     }));
 
-    // Preload image safely for Canvas CORS export
+    // Preload CORS-safe data URL in the background for clean canvas export
     if (highResArtworkUrl) {
       try {
         const safeUrl = await loadCorsSafeImage(highResArtworkUrl);
-        setMetadata((prev) => ({
-          ...prev,
-          posterUrl: safeUrl,
-        }));
+        setMetadata((prev) => {
+          // Only replace if the user hasn't selected another image in the meantime
+          if (prev.posterUrl === highResArtworkUrl) {
+            return {
+              ...prev,
+              posterUrl: safeUrl,
+            };
+          }
+          return prev;
+        });
       } catch (err) {
-        setMetadata((prev) => ({
-          ...prev,
-          posterUrl: highResArtworkUrl,
-        }));
+        console.warn('Failed to load CORS safe image:', err);
       }
     }
   };
@@ -107,10 +127,16 @@ export const App: React.FC = () => {
   };
 
   const handleReset = () => {
+    const currentSession = getInitialSessionNumber();
     setMetadata(DEFAULT_METADATA);
     setSchedule(DEFAULT_SCHEDULE);
-    setTheme(DEFAULT_THEME);
+    setTheme({
+      ...DEFAULT_THEME,
+      sessionNumber: currentSession,
+      footerLeft: `NO. ${String(currentSession).padStart(4, '0')}`,
+    });
     setAdjustment(DEFAULT_ADJUSTMENT);
+    setTextSize('large');
   };
 
   return (
@@ -135,8 +161,10 @@ export const App: React.FC = () => {
           <ScheduleSection
             schedule={schedule}
             theme={theme}
+            textSize={textSize}
             onChangeSchedule={setSchedule}
             onChangeTheme={setTheme}
+            onChangeTextSize={setTextSize}
           />
 
           <ExportSection
@@ -151,6 +179,7 @@ export const App: React.FC = () => {
           schedule={schedule}
           theme={theme}
           adjustment={adjustment}
+          textSize={textSize}
         />
       </main>
     </>

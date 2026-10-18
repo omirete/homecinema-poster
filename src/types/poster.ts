@@ -1,3 +1,5 @@
+export type PosterTextSize = 'normal' | 'large' | 'xlarge';
+
 export interface MovieMetadata {
   title: string;
   year: string;
@@ -19,11 +21,19 @@ export interface PosterTheme {
   footerLeft: string;
   footerCenter: string;
   footerRight: string;
+  sessionNumber?: number | '';
 }
 
 export interface ImageAdjustment {
   posY: number;
   scale: number;
+}
+
+export interface MovieImageOption {
+  url: string;
+  previewUrl: string;
+  label: string;
+  type: 'poster' | 'backdrop' | 'alternative' | 'itunes';
 }
 
 export interface MovieSearchResult {
@@ -34,4 +44,5 @@ export interface MovieSearchResult {
   primaryGenreName?: string;
   artistName?: string;
   artworkUrl100: string;
+  availableImages?: MovieImageOption[];
 }
