@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect, useCallback } from 'react';
 import type {
   MovieMetadata,
   ScheduleInfo,
@@ -6,6 +6,7 @@ import type {
   ImageAdjustment,
   MovieSearchResult,
   PosterTextSize,
+  SavedPosterProject,
 } from './types/poster';
 import { Header } from './components/Header/Header';
 import { MovieSearchSection } from './components/Controls/MovieSearchSection';
@@ -14,7 +15,15 @@ import { MovieDetailsSection } from './components/Controls/MovieDetailsSection';
 import { ScheduleSection } from './components/Controls/ScheduleSection';
 import { ExportSection } from './components/Controls/ExportSection';
 import { PosterPreview } from './components/Poster/PosterPreview';
+import { SavedPostersPanel } from './components/SavedPosters/SavedPostersPanel';
 import { formatDuration, loadCorsSafeImage } from './services/movieApi';
+import {
+  getAllSavedProjects,
+  savePosterProject,
+  deletePosterProject,
+} from './services/posterStorage';
+import { generatePosterThumbnail } from './services/posterExport';
+import { FolderKanban, Check, Sparkles } from 'lucide-react';
 import './components/Controls/Controls.css';
 import './App.css';
 
@@ -73,6 +82,40 @@ export const App: React.FC = () => {
   const [textSize, setTextSize] = useState<PosterTextSize>('large');
   const [isAdjusting, setIsAdjusting] = useState<boolean>(false);
 
+  // Saved Posters Panel & Local Storage state
+  const [savedProjects, setSavedProjects] = useState<SavedPosterProject[]>([]);
+  const [currentProjectId, setCurrentProjectId] = useState<string | null>(null);
+  const [isSavedPanelOpen, setIsSavedPanelOpen] = useState<boolean>(() => {
+    if (typeof window !== 'undefined') {
+      return window.innerWidth >= 1400;
+    }
+    return false;
+  });
+  const [isSaving, setIsSaving] = useState<boolean>(false);
+  const [saveSuccess, setSaveSuccess] = useState<boolean>(false);
+  const [toastMessage, setToastMessage] = useState<string | null>(null);
+
+  const showToast = useCallback((msg: string) => {
+    setToastMessage(msg);
+    setTimeout(() => {
+      setToastMessage((prev) => (prev === msg ? null : prev));
+    }, 3200);
+  }, []);
+
+  // Fetch saved projects on mount
+  const refreshSavedProjects = useCallback(async () => {
+    try {
+      const projects = await getAllSavedProjects();
+      setSavedProjects(projects);
+    } catch (err) {
+      console.error('Failed to load saved projects:', err);
+    }
+  }, []);
+
+  useEffect(() => {
+    refreshSavedProjects();
+  }, [refreshSavedProjects]);
+
   const handleToggleAdjusting = () => {
     setIsAdjusting((prev) => !prev);
   };
@@ -114,7 +157,6 @@ export const App: React.FC = () => {
       try {
         const safeUrl = await loadCorsSafeImage(highResArtworkUrl);
         setMetadata((prev) => {
-          // Only replace if the user hasn't selected another image in the meantime
           if (prev.posterUrl === highResArtworkUrl) {
             return {
               ...prev,
@@ -137,6 +179,155 @@ export const App: React.FC = () => {
     }));
   };
 
+  // Save current project (either update existing or save as new)
+  const handleSaveCurrentProject = async (forceNew: boolean = false) => {
+    setIsSaving(true);
+    try {
+      let thumbUrl = metadata.posterUrl;
+      if (posterRef.current) {
+        try {
+          thumbUrl = await generatePosterThumbnail(posterRef.current, metadata.posterUrl);
+        } catch (e) {
+          console.warn('Could not generate canvas thumbnail:', e);
+        }
+      }
+
+      const id = !forceNew && currentProjectId
+        ? currentProjectId
+        : `poster_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`;
+
+      const title = metadata.title || 'SIN TÍTULO';
+      const sessionNum = theme.sessionNumber;
+
+      const project: SavedPosterProject = {
+        id,
+        title,
+        sessionNumber: sessionNum,
+        createdAt: Date.now(),
+        updatedAt: Date.now(),
+        metadata,
+        schedule,
+        theme,
+        adjustment,
+        textSize,
+        thumbnailUrl: thumbUrl,
+      };
+
+      await savePosterProject(project);
+      setCurrentProjectId(id);
+
+      if (sessionNum !== undefined && sessionNum !== '') {
+        localStorage.setItem('homecinema_session_number', String(sessionNum));
+      }
+
+      await refreshSavedProjects();
+
+      setSaveSuccess(true);
+      setTimeout(() => setSaveSuccess(false), 2500);
+
+      showToast(`¡Póster "${title}" guardado en tu colección semanal!`);
+    } catch (err) {
+      console.error('Failed to save poster:', err);
+      showToast('Error al guardar el póster');
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  // Load a previously saved project into the editor
+  const handleLoadProject = (project: SavedPosterProject) => {
+    setMetadata(project.metadata);
+    setSchedule(project.schedule);
+    setTheme(project.theme);
+    setAdjustment(project.adjustment || DEFAULT_ADJUSTMENT);
+    setTextSize(project.textSize || 'large');
+    setCurrentProjectId(project.id);
+    setIsAdjusting(false);
+
+    if (project.theme.sessionNumber !== undefined && project.theme.sessionNumber !== '') {
+      localStorage.setItem('homecinema_session_number', String(project.theme.sessionNumber));
+    }
+
+    showToast(`Póster cargado: "${project.metadata.title || project.title}"`);
+  };
+
+  // Start a fresh new weekly poster with auto-incremented session number
+  const handleNewWeeklyPoster = () => {
+    // Determine next weekly session number
+    let nextSession = 1;
+    if (savedProjects.length > 0) {
+      const maxSession = savedProjects.reduce((max, p) => {
+        const num = typeof p.sessionNumber === 'number' ? p.sessionNumber : parseInt(String(p.sessionNumber), 10);
+        return !isNaN(num) && num > max ? num : max;
+      }, 0);
+      nextSession = maxSession + 1;
+    } else {
+      nextSession = getInitialSessionNumber();
+    }
+
+    setMetadata(DEFAULT_METADATA);
+    setSchedule(DEFAULT_SCHEDULE);
+    setTheme({
+      ...DEFAULT_THEME,
+      sessionNumber: nextSession,
+      footerLeft: `NO. ${String(nextSession).padStart(4, '0')}`,
+    });
+    setAdjustment(DEFAULT_ADJUSTMENT);
+    setIsAdjusting(false);
+    setTextSize('large');
+    setCurrentProjectId(null);
+
+    localStorage.setItem('homecinema_session_number', String(nextSession));
+    showToast(`Nueva función preparada: Edición Nº ${String(nextSession).padStart(4, '0')}`);
+  };
+
+  // Duplicate an existing project
+  const handleDuplicateProject = async (project: SavedPosterProject) => {
+    try {
+      const maxSession = savedProjects.reduce((max, p) => {
+        const num = typeof p.sessionNumber === 'number' ? p.sessionNumber : parseInt(String(p.sessionNumber), 10);
+        return !isNaN(num) && num > max ? num : max;
+      }, 0);
+      const nextSession = maxSession + 1;
+
+      const duplicated: SavedPosterProject = {
+        ...project,
+        id: `poster_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`,
+        title: `${project.metadata.title || project.title} (Copia)`,
+        sessionNumber: nextSession,
+        createdAt: Date.now(),
+        updatedAt: Date.now(),
+        theme: {
+          ...project.theme,
+          sessionNumber: nextSession,
+          footerLeft: `NO. ${String(nextSession).padStart(4, '0')}`,
+        },
+      };
+
+      await savePosterProject(duplicated);
+      await refreshSavedProjects();
+      showToast(`Póster duplicado como nueva sesión #${nextSession}`);
+    } catch (err) {
+      console.error('Failed to duplicate project:', err);
+      showToast('Error al duplicar póster');
+    }
+  };
+
+  // Delete project from collection
+  const handleDeleteProject = async (id: string) => {
+    try {
+      await deletePosterProject(id);
+      if (currentProjectId === id) {
+        setCurrentProjectId(null);
+      }
+      await refreshSavedProjects();
+      showToast('Póster eliminado de tu colección');
+    } catch (err) {
+      console.error('Failed to delete project:', err);
+      showToast('Error al eliminar póster');
+    }
+  };
+
   const handleReset = () => {
     const currentSession = getInitialSessionNumber();
     setMetadata(DEFAULT_METADATA);
@@ -149,13 +340,24 @@ export const App: React.FC = () => {
     setAdjustment(DEFAULT_ADJUSTMENT);
     setIsAdjusting(false);
     setTextSize('large');
+    setCurrentProjectId(null);
+    showToast('Plantilla restablecida');
   };
 
   return (
     <>
-      <Header onReset={handleReset} />
+      <Header
+        onReset={handleReset}
+        onSave={() => handleSaveCurrentProject(false)}
+        isSaving={isSaving}
+        saveSuccess={saveSuccess}
+        onToggleSavedPanel={() => setIsSavedPanelOpen((prev) => !prev)}
+        isSavedPanelOpen={isSavedPanelOpen}
+        savedCount={savedProjects.length}
+      />
 
       <main className="app-container">
+        {/* Left Column: Form Controls */}
         <div className="controls-panel">
           <MovieSearchSection onSelectMovie={handleSelectMovie} />
 
@@ -184,9 +386,14 @@ export const App: React.FC = () => {
           <ExportSection
             posterRef={posterRef}
             movieTitle={metadata.title}
+            onSave={() => handleSaveCurrentProject(false)}
+            isSaving={isSaving}
+            onOpenSavedPanel={() => setIsSavedPanelOpen(true)}
+            savedCount={savedProjects.length}
           />
         </div>
 
+        {/* Center Column: Live Poster Preview */}
         <PosterPreview
           posterRef={posterRef}
           metadata={metadata}
@@ -198,7 +405,49 @@ export const App: React.FC = () => {
           onToggleAdjusting={handleToggleAdjusting}
           onChangeAdjustment={setAdjustment}
         />
+
+        {/* Right Column: Saved Posters History Panel */}
+        <SavedPostersPanel
+          isOpen={isSavedPanelOpen}
+          onClose={() => setIsSavedPanelOpen(false)}
+          projects={savedProjects}
+          currentProjectId={currentProjectId}
+          onLoadProject={handleLoadProject}
+          onSaveCurrent={handleSaveCurrentProject}
+          onNewProject={handleNewWeeklyPoster}
+          onDeleteProject={handleDeleteProject}
+          onDuplicateProject={handleDuplicateProject}
+          isSaving={isSaving}
+          currentMovieTitle={metadata.title}
+        />
       </main>
+
+      {/* Floating edge tab to open saved posters if panel is closed */}
+      {!isSavedPanelOpen && (
+        <button
+          type="button"
+          className="btn-open-panel-tab"
+          onClick={() => setIsSavedPanelOpen(true)}
+          title="Ver pósters guardados de semanas anteriores"
+          aria-label="Abrir panel de pósters guardados"
+        >
+          <FolderKanban size={16} />
+          <span className="tab-vertical-text">Pósters</span>
+          {savedProjects.length > 0 && (
+            <span className="tab-badge">{savedProjects.length}</span>
+          )}
+        </button>
+      )}
+
+      {/* Toast Notification */}
+      {toastMessage && (
+        <div className="app-toast" role="status" aria-live="polite">
+          <span className="app-toast-icon">
+            <Sparkles size={16} />
+          </span>
+          <span>{toastMessage}</span>
+        </div>
+      )}
     </>
   );
 };

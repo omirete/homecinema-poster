@@ -48,3 +48,18 @@ export interface MovieSearchResult {
   artworkUrl100: string;
   availableImages?: MovieImageOption[];
 }
+
+export interface SavedPosterProject {
+  id: string;
+  title: string;
+  sessionNumber?: number | '';
+  createdAt: number;
+  updatedAt: number;
+  metadata: MovieMetadata;
+  schedule: ScheduleInfo;
+  theme: PosterTheme;
+  adjustment: ImageAdjustment;
+  textSize: PosterTextSize;
+  thumbnailUrl?: string;
+}
+

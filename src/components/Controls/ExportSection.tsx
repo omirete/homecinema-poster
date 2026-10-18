@@ -1,13 +1,24 @@
 import React, { useState } from 'react';
-import { Download, Loader2, CheckCircle2, AlertCircle } from 'lucide-react';
+import { Download, Loader2, CheckCircle2, AlertCircle, Save, FolderKanban } from 'lucide-react';
 import { exportPosterAsPng } from '../../services/posterExport';
 
 interface ExportSectionProps {
   posterRef: React.RefObject<HTMLDivElement | null>;
   movieTitle: string;
+  onSave?: () => void;
+  isSaving?: boolean;
+  onOpenSavedPanel?: () => void;
+  savedCount?: number;
 }
 
-export const ExportSection: React.FC<ExportSectionProps> = ({ posterRef, movieTitle }) => {
+export const ExportSection: React.FC<ExportSectionProps> = ({
+  posterRef,
+  movieTitle,
+  onSave,
+  isSaving = false,
+  onOpenSavedPanel,
+  savedCount = 0,
+}) => {
   const [isExporting, setIsExporting] = useState(false);
   const [successMessage, setSuccessMessage] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
@@ -37,7 +48,8 @@ export const ExportSection: React.FC<ExportSectionProps> = ({ posterRef, movieTi
   };
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+      {/* Primary Download Button */}
       <button
         className="btn-download"
         id="btnDownload"
@@ -59,6 +71,34 @@ export const ExportSection: React.FC<ExportSectionProps> = ({ posterRef, movieTi
           </>
         )}
       </button>
+
+      {/* Quick Save & Collection Buttons */}
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
+        {onSave && (
+          <button
+            type="button"
+            className="btn-action-secondary"
+            onClick={onSave}
+            disabled={isSaving}
+            title="Guardar este diseño en la colección local"
+          >
+            {isSaving ? <Loader2 size={15} className="spin" /> : <Save size={15} />}
+            <span>Guardar en Colección</span>
+          </button>
+        )}
+
+        {onOpenSavedPanel && (
+          <button
+            type="button"
+            className="btn-action-secondary"
+            onClick={onOpenSavedPanel}
+            title="Abrir panel lateral de pósters anteriores"
+          >
+            <FolderKanban size={15} />
+            <span>Mis Pósters {savedCount > 0 ? `(${savedCount})` : ''}</span>
+          </button>
+        )}
+      </div>
 
       {successMessage && (
         <div

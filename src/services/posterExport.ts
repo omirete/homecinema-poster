@@ -74,3 +74,35 @@ export async function exportPosterAsPng(
   link.click();
   document.body.removeChild(link);
 }
+
+/**
+ * Capture a lightweight preview thumbnail (data URL) of the poster for the projects panel
+ */
+export async function generatePosterThumbnail(
+  posterElement: HTMLElement,
+  fallbackUrl: string = ''
+): Promise<string> {
+  try {
+    const canvas = await html2canvas(posterElement, {
+      scale: 0.35, // Low scale produces a lightweight ~182x273 preview
+      useCORS: true,
+      allowTaint: true,
+      backgroundColor: '#11100e',
+      logging: false,
+      onclone: (_clonedDoc, clonedElement) => {
+        clonedElement.style.transform = 'none';
+        clonedElement.style.width = '520px';
+        clonedElement.style.height = '780px';
+        const overlay = clonedElement.querySelector('.poster-adjust-overlay');
+        if (overlay) {
+          overlay.remove();
+        }
+      },
+    });
+    return canvas.toDataURL('image/jpeg', 0.85);
+  } catch (err) {
+    console.warn('Could not generate canvas thumbnail, falling back to artwork URL:', err);
+    return fallbackUrl;
+  }
+}
+

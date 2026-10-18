@@ -529,3 +529,33 @@
   font-family: var(--font-poster-mono);
   letter-spacing: 1px;
 }
+
+.btn-action-secondary {
+  background: var(--panel-card);
+  border: 1px solid var(--panel-card-border);
+  color: var(--text-main);
+  font-size: 0.8rem;
+  font-weight: 600;
+  padding: 10px 12px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  transition: all 0.2s ease;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.btn-action-secondary:hover:not(:disabled) {
+  background: #282b36;
+  border-color: var(--accent);
+  color: var(--accent-light);
+  transform: translateY(-1px);
+}
+
+.btn-action-secondary:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
