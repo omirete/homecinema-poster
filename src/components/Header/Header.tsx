@@ -33,8 +33,6 @@ export const Header: React.FC<HeaderProps> = ({
       </div>
 
       <div className="header-meta">
-        <span className="header-tag">Edición Semanal</span>
-
         {/* Save current project button */}
         <button
           className={`header-save-btn ${saveSuccess ? 'success' : ''}`}
