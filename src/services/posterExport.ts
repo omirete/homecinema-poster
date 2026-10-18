@@ -14,7 +14,7 @@ export async function exportPosterAsPng(
     allowTaint: true,
     backgroundColor: '#11100e',
     logging: false,
-    onclone: (_clonedDoc, clonedElement) => {
+    onclone: async (_clonedDoc, clonedElement) => {
       // Ensure the exported element is rendered at full canonical dimensions (520x780)
       clonedElement.style.transform = 'none';
       clonedElement.style.width = '520px';
@@ -23,6 +23,37 @@ export async function exportPosterAsPng(
         clonedElement.parentElement.style.width = '520px';
         clonedElement.parentElement.style.height = '780px';
         clonedElement.parentElement.style.overflow = 'visible';
+      }
+      const overlay = clonedElement.querySelector('.poster-adjust-overlay');
+      if (overlay) {
+        overlay.remove();
+      }
+
+      // Bake the vintage film color filter into the artwork image so html2canvas renders the graded colors
+      const originalImg = posterElement.querySelector<HTMLImageElement>('#posterImg');
+      const clonedImg = clonedElement.querySelector<HTMLImageElement>('#posterImg');
+
+      if (originalImg && clonedImg && originalImg.naturalWidth > 0) {
+        try {
+          const filterCanvas = document.createElement('canvas');
+          filterCanvas.width = originalImg.naturalWidth;
+          filterCanvas.height = originalImg.naturalHeight;
+          const ctx = filterCanvas.getContext('2d');
+          if (ctx) {
+            ctx.filter = 'contrast(108%) brightness(92%) saturate(90%)';
+            ctx.drawImage(originalImg, 0, 0);
+            const dataUrl = filterCanvas.toDataURL('image/png');
+            await new Promise<void>((resolve) => {
+              clonedImg.onload = () => resolve();
+              clonedImg.onerror = () => resolve();
+              clonedImg.src = dataUrl;
+              clonedImg.style.filter = 'none';
+              if (clonedImg.complete) resolve();
+            });
+          }
+        } catch (e) {
+          console.warn('Could not bake image filter due to CORS or canvas error:', e);
+        }
       }
     },
   });

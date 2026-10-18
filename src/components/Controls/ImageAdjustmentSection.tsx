@@ -1,31 +1,35 @@
 import React, { useRef } from 'react';
-import { Sliders, Upload } from 'lucide-react';
+import { Move, Check, Upload, RotateCcw } from 'lucide-react';
 import type { ImageAdjustment } from '../../types/poster';
 
 interface ImageAdjustmentSectionProps {
   adjustment: ImageAdjustment;
   onChangeAdjustment: (adjustment: ImageAdjustment) => void;
   onCustomImageUpload: (dataUrl: string) => void;
+  isAdjusting?: boolean;
+  onToggleAdjusting?: () => void;
 }
 
 export const ImageAdjustmentSection: React.FC<ImageAdjustmentSectionProps> = ({
   adjustment,
   onChangeAdjustment,
   onCustomImageUpload,
+  isAdjusting = false,
+  onToggleAdjusting,
 }) => {
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const handlePosYChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    onChangeAdjustment({
-      ...adjustment,
-      posY: Number(e.target.value),
-    });
-  };
+  const scalePercent = Math.round((adjustment.scale || 1) * 100);
+  const isShifted =
+    (adjustment.x !== 0 && adjustment.x !== undefined) ||
+    (adjustment.y !== 0 && adjustment.y !== undefined);
 
-  const handleScaleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleReset = () => {
     onChangeAdjustment({
-      ...adjustment,
-      scale: Number(e.target.value),
+      x: 0,
+      y: 0,
+      scale: 1,
+      posY: 30,
     });
   };
 
@@ -46,44 +50,53 @@ export const ImageAdjustmentSection: React.FC<ImageAdjustmentSectionProps> = ({
     <div className="control-card">
       <div className="section-header">
         <div className="section-title">
-          <Sliders size={15} />
+          <Move size={15} />
           <span>2. Ajustar Imagen & Encuadre</span>
         </div>
       </div>
 
-      <div className="grid-2">
-        <div className="field-group">
-          <div className="slider-header">
-            <label htmlFor="imgPosY">Posición Vertical</label>
-            <span className="slider-val">{adjustment.posY}%</span>
-          </div>
-          <input
-            type="range"
-            id="imgPosY"
-            min="0"
-            max="100"
-            value={adjustment.posY}
-            onChange={handlePosYChange}
-          />
-        </div>
+      {/* Button to enable/disable picture modification */}
+      {onToggleAdjusting && (
+        <button
+          type="button"
+          className={`btn-toggle-adjust-compact ${isAdjusting ? 'active' : ''}`}
+          onClick={onToggleAdjusting}
+          id="btnToggleAdjust2D"
+        >
+          {isAdjusting ? (
+            <>
+              <Check size={18} />
+              <span>Finalizar edición de imagen</span>
+            </>
+          ) : (
+            <>
+              <Move size={18} />
+              <span>Modificar posición y escala</span>
+            </>
+          )}
+        </button>
+      )}
 
-        <div className="field-group">
-          <div className="slider-header">
-            <label htmlFor="imgScale">Zoom / Escala</label>
-            <span className="slider-val">{adjustment.scale.toFixed(2)}x</span>
-          </div>
-          <input
-            type="range"
-            id="imgScale"
-            min="1"
-            max="1.6"
-            step="0.02"
-            value={adjustment.scale}
-            onChange={handleScaleChange}
-          />
+      {/* Status indicator when active or adjusted */}
+      {(isAdjusting || isShifted || scalePercent !== 100) && (
+        <div className="adjust-compact-status">
+          <span className="compact-status-val">
+            Escala: <strong>{scalePercent}%</strong>
+            {isShifted ? ` • Desplazado: (${adjustment.x || 0}px, ${adjustment.y || 0}px)` : ''}
+          </span>
+          <button
+            type="button"
+            className="btn-text-reset"
+            onClick={handleReset}
+            title="Restablecer posición y escala a valores originales"
+          >
+            <RotateCcw size={12} />
+            <span>Restablecer</span>
+          </button>
         </div>
-      </div>
+      )}
 
+      {/* Local File Upload */}
       <div className="file-upload-section">
         <label>O subir tu propio archivo de imagen:</label>
         <div

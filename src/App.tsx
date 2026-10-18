@@ -52,13 +52,15 @@ const DEFAULT_THEME: PosterTheme = {
   headlineText: 'DOMINGO DE CINE EN CASA',
   footerLeft: `NO. ${String(initialSession).padStart(4, '0')}`,
   footerCenter: '',
-  footerRight: 'Cupos limitados',
+  footerRight: 'VOSE',
   sessionNumber: initialSession,
 };
 
 const DEFAULT_ADJUSTMENT: ImageAdjustment = {
-  posY: 30,
+  x: 0,
+  y: 0,
   scale: 1,
+  posY: 30,
 };
 
 export const App: React.FC = () => {
@@ -69,6 +71,11 @@ export const App: React.FC = () => {
   const [theme, setTheme] = useState<PosterTheme>(DEFAULT_THEME);
   const [adjustment, setAdjustment] = useState<ImageAdjustment>(DEFAULT_ADJUSTMENT);
   const [textSize, setTextSize] = useState<PosterTextSize>('large');
+  const [isAdjusting, setIsAdjusting] = useState<boolean>(false);
+
+  const handleToggleAdjusting = () => {
+    setIsAdjusting((prev) => !prev);
+  };
 
   const handleSelectMovie = async (movie: MovieSearchResult, highResArtworkUrl: string) => {
     let year = '';
@@ -87,6 +94,9 @@ export const App: React.FC = () => {
     const genre = movie.primaryGenreName || 'CINE';
     const director = movie.artistName || 'Desconocido';
     const title = movie.trackName || '';
+
+    // Reset framing adjustment when selecting a new movie
+    setAdjustment(DEFAULT_ADJUSTMENT);
 
     // Update metadata fields immediately AND posterUrl immediately so preview reflects the selection instantly!
     setMetadata((prev) => ({
@@ -120,6 +130,7 @@ export const App: React.FC = () => {
   };
 
   const handleCustomImageUpload = (dataUrl: string) => {
+    setAdjustment(DEFAULT_ADJUSTMENT);
     setMetadata((prev) => ({
       ...prev,
       posterUrl: dataUrl,
@@ -136,6 +147,7 @@ export const App: React.FC = () => {
       footerLeft: `NO. ${String(currentSession).padStart(4, '0')}`,
     });
     setAdjustment(DEFAULT_ADJUSTMENT);
+    setIsAdjusting(false);
     setTextSize('large');
   };
 
@@ -151,6 +163,8 @@ export const App: React.FC = () => {
             adjustment={adjustment}
             onChangeAdjustment={setAdjustment}
             onCustomImageUpload={handleCustomImageUpload}
+            isAdjusting={isAdjusting}
+            onToggleAdjusting={handleToggleAdjusting}
           />
 
           <MovieDetailsSection
@@ -180,6 +194,9 @@ export const App: React.FC = () => {
           theme={theme}
           adjustment={adjustment}
           textSize={textSize}
+          isAdjusting={isAdjusting}
+          onToggleAdjusting={handleToggleAdjusting}
+          onChangeAdjustment={setAdjustment}
         />
       </main>
     </>

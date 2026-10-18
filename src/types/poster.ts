@@ -25,8 +25,10 @@ export interface PosterTheme {
 }
 
 export interface ImageAdjustment {
-  posY: number;
+  x: number;
+  y: number;
   scale: number;
+  posY?: number;
 }
 
 export interface MovieImageOption {
