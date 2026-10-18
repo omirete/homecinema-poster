@@ -17,6 +17,8 @@
   display: flex;
   align-items: center;
   gap: 12px;
+  min-width: 0;
+  flex-shrink: 1;
 }
 
 .brand-icon {
@@ -30,6 +32,7 @@
   justify-content: center;
   color: var(--accent);
   box-shadow: 0 0 14px rgba(217, 155, 56, 0.2);
+  flex-shrink: 0;
 }
 
 .brand-title {
@@ -41,6 +44,9 @@
   display: flex;
   align-items: center;
   gap: 8px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .brand-title span {
@@ -50,8 +56,10 @@
 .header-meta {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 10px;
+  flex-shrink: 0;
 }
+
 
 .header-tag {
   font-size: 0.72rem;

@@ -174,16 +174,6 @@ export const SavedPostersPanel: React.FC<SavedPostersPanelProps> = ({
         <div className="saved-panel-cta">
           <button
             type="button"
-            className="btn-new-poster"
-            onClick={onNewProject}
-            title="Crear un póster nuevo para la próxima semana"
-          >
-            <Plus size={16} />
-            <span>Nueva Función Semanal</span>
-          </button>
-
-          <button
-            type="button"
             className="btn-save-current"
             onClick={() => onSaveCurrent(false)}
             disabled={isSaving}
@@ -198,9 +188,19 @@ export const SavedPostersPanel: React.FC<SavedPostersPanelProps> = ({
               {isSaving
                 ? 'Guardando...'
                 : currentProjectId
-                ? 'Actualizar Guardado'
-                : 'Guardar Póster Actual'}
+                  ? 'Actualizar Guardado'
+                  : 'Guardar póster actual'}
             </span>
+          </button>
+
+          <button
+            type="button"
+            className="btn-new-poster"
+            onClick={onNewProject}
+            title="Crear un póster nuevo para la próxima semana"
+          >
+            <Plus size={15} />
+            <span>Nueva función semanal</span>
           </button>
         </div>
 

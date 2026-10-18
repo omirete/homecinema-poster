@@ -536,14 +536,22 @@
   color: var(--text-main);
   font-size: 0.8rem;
   font-weight: 600;
-  padding: 10px 12px;
+  padding: 10px 8px;
   border-radius: 8px;
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 7px;
+  gap: 6px;
   transition: all 0.2s ease;
   cursor: pointer;
+  white-space: nowrap;
+  min-width: 0;
+  box-sizing: border-box;
+}
+
+.btn-action-secondary span {
+  overflow: hidden;
+  text-overflow: ellipsis;
   white-space: nowrap;
 }
 
