@@ -1,0 +1,83 @@
+.app-header {
+  background: var(--bg-darker);
+  border-bottom: 1px solid var(--panel-border);
+  padding: 16px 28px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  backdrop-filter: blur(12px);
+}
+
+.header-brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.brand-icon {
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  background: linear-gradient(135deg, #2b2111, #1a160d);
+  border: 1px solid var(--accent);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--accent);
+  box-shadow: 0 0 14px rgba(217, 155, 56, 0.2);
+}
+
+.brand-title {
+  font-size: 1.15rem;
+  letter-spacing: 1.2px;
+  text-transform: uppercase;
+  color: #fff;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.brand-title span {
+  color: var(--accent);
+}
+
+.header-meta {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.header-tag {
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: var(--accent);
+  background: rgba(217, 155, 56, 0.1);
+  border: 1px solid rgba(217, 155, 56, 0.25);
+  padding: 4px 12px;
+  border-radius: 20px;
+}
+
+.header-reset-btn {
+  background: transparent;
+  color: var(--text-muted);
+  border: 1px solid var(--panel-card-border);
+  padding: 6px 12px;
+  border-radius: 6px;
+  font-size: 0.78rem;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  transition: all 0.2s;
+}
+
+.header-reset-btn:hover {
+  color: #fff;
+  border-color: var(--accent);
+  background: rgba(217, 155, 56, 0.08);
+}

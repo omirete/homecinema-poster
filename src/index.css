@@ -1,0 +1,143 @@
+:root {
+  --bg-dark: #0f1013;
+  --bg-darker: #090a0c;
+  --panel-bg: #18191f;
+  --panel-border: #2c2f38;
+  --panel-card: #20222a;
+  --panel-card-border: #353844;
+
+  --accent: #d99b38;
+  --accent-hover: #b8802a;
+  --accent-glow: rgba(217, 155, 56, 0.25);
+  --accent-light: #f3be6a;
+
+  --text-main: #f3f0e8;
+  --text-muted: #9aa1ad;
+  --text-dim: #676e7d;
+
+  --success: #27ae60;
+  --success-hover: #219653;
+  --danger: #e74c3c;
+
+  /* Poster Specific Design Tokens */
+  --poster-bg: #11100e;
+  --poster-paper: #f4eee1;
+  --poster-accent: #c43224;
+  --poster-gold: #c9933e;
+  --poster-ink: #181513;
+
+  --font-ui: "Plus Jakarta Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --font-poster-title: "Bebas Neue", sans-serif;
+  --font-poster-mono: "Courier Prime", monospace;
+  --font-poster-serif: "Playfair Display", serif;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: var(--font-ui);
+  background: var(--bg-dark);
+  color: var(--text-main);
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+#root {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+/* Custom Scrollbars */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-track {
+  background: var(--bg-darker);
+}
+::-webkit-scrollbar-thumb {
+  background: #2f323c;
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #444856;
+}
+
+/* Global Form Elements */
+input[type="text"],
+input[type="number"],
+input[type="time"],
+textarea,
+select {
+  background: #111216;
+  border: 1px solid var(--panel-card-border);
+  color: #fff;
+  padding: 10px 14px;
+  border-radius: 8px;
+  font-size: 0.92rem;
+  font-family: inherit;
+  width: 100%;
+  outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+input[type="text"]:focus,
+textarea:focus,
+select:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-glow);
+}
+
+label {
+  display: block;
+  font-size: 0.78rem;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  color: var(--text-muted);
+  margin-bottom: 6px;
+  text-transform: uppercase;
+}
+
+/* Custom Range Slider */
+input[type="range"] {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 100%;
+  height: 6px;
+  background: #2a2d36;
+  border-radius: 3px;
+  outline: none;
+  cursor: pointer;
+}
+
+input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: var(--accent);
+  cursor: pointer;
+  box-shadow: 0 0 8px rgba(217, 155, 56, 0.6);
+  transition: transform 0.15s, background-color 0.15s;
+}
+
+input[type="range"]::-webkit-slider-thumb:hover {
+  transform: scale(1.15);
+  background: var(--accent-light);
+}
+
+button {
+  font-family: inherit;
+  cursor: pointer;
+  border: none;
+  outline: none;
+}
