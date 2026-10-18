@@ -1,7 +1,9 @@
 .app-header {
+  height: var(--header-height);
+  box-sizing: border-box;
   background: var(--bg-darker);
   border-bottom: 1px solid var(--panel-border);
-  padding: 16px 28px;
+  padding: 0 28px;
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -80,4 +82,21 @@
   color: #fff;
   border-color: var(--accent);
   background: rgba(217, 155, 56, 0.08);
+}
+
+@media (max-height: 760px) {
+  :root {
+    --header-height: 56px;
+    --content-padding-top: 16px;
+  }
+  .app-header {
+    padding: 0 20px;
+  }
+  .brand-icon {
+    width: 30px;
+    height: 30px;
+  }
+  .brand-title {
+    font-size: 1.05rem;
+  }
 }

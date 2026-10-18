@@ -3,10 +3,11 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  position: sticky;
-  top: 85px;
+  justify-content: flex-start;
   max-width: 600px;
   width: 100%;
+  height: 100%;
+  box-sizing: border-box;
 }
 
 .preview-indicator {
@@ -18,15 +19,35 @@
   display: flex;
   align-items: center;
   gap: 8px;
+  font-weight: 600;
+  user-select: none;
 }
 
-.preview-indicator::before,
-.preview-indicator::after {
-  content: "";
-  display: inline-block;
-  width: 24px;
-  height: 1px;
-  background: #2a2d36;
+.live-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--accent);
+  box-shadow: 0 0 8px var(--accent);
+  animation: pulse-live 2s infinite ease-in-out;
+}
+
+@keyframes pulse-live {
+  0%, 100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.35;
+    transform: scale(0.85);
+  }
+}
+
+/* Contenedor que adapta el espacio ocupado al tamaño escalado sin animaciones de scroll */
+.poster-scaler-wrapper {
+  position: relative;
+  display: flex;
+  justify-content: center;
 }
 
 /* EL PÓSTER EN SÍ (Proporción vertical cine 2:3 -> 520x780 px en pantalla, exportable a 1040x1560) */
@@ -44,7 +65,8 @@
   color: var(--poster-paper);
   user-select: none;
   border-radius: 2px;
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  flex-shrink: 0;
+  transform-origin: top center;
 }
 
 /* Textura de papel / grano vintage */
@@ -257,12 +279,11 @@
   .preview-area {
     position: static;
     width: 100%;
+    height: auto;
     margin-top: 24px;
   }
 
-  .poster-canvas {
-    width: 100%;
-    max-width: 480px;
-    height: 720px;
+  .preview-indicator {
+    justify-content: center;
   }
 }

@@ -14,6 +14,17 @@ export async function exportPosterAsPng(
     allowTaint: true,
     backgroundColor: '#11100e',
     logging: false,
+    onclone: (_clonedDoc, clonedElement) => {
+      // Ensure the exported element is rendered at full canonical dimensions (520x780)
+      clonedElement.style.transform = 'none';
+      clonedElement.style.width = '520px';
+      clonedElement.style.height = '780px';
+      if (clonedElement.parentElement) {
+        clonedElement.parentElement.style.width = '520px';
+        clonedElement.parentElement.style.height = '780px';
+        clonedElement.parentElement.style.overflow = 'visible';
+      }
+    },
   });
 
   const slug = (movieTitle || 'cine-club-poster')

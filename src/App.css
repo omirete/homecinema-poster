@@ -2,12 +2,20 @@
   display: flex;
   flex: 1;
   gap: 36px;
-  padding: 32px 28px 48px;
+  padding: 16px 28px 20px;
   max-width: 1400px;
   margin: 0 auto;
   width: 100%;
   align-items: flex-start;
   justify-content: center;
+  box-sizing: border-box;
+}
+
+@media (min-width: 1025px) {
+  .app-container {
+    height: calc(100vh - var(--header-height));
+    overflow: hidden;
+  }
 }
 
 @media (max-width: 1024px) {
@@ -15,6 +23,6 @@
     flex-direction: column;
     align-items: center;
     gap: 30px;
-    padding: 20px 16px 36px;
+    padding: 20px 16px 40px;
   }
 }

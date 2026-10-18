@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import type { MovieMetadata, ScheduleInfo, PosterTheme, ImageAdjustment } from '../../types/poster';
 import './PosterPreview.css';
 
@@ -10,6 +10,9 @@ interface PosterPreviewProps {
   adjustment: ImageAdjustment;
 }
 
+const CANONICAL_WIDTH = 520;
+const CANONICAL_HEIGHT = 780;
+
 export const PosterPreview: React.FC<PosterPreviewProps> = ({
   posterRef,
   metadata,
@@ -17,11 +20,69 @@ export const PosterPreview: React.FC<PosterPreviewProps> = ({
   theme,
   adjustment,
 }) => {
+  const calculateFitScale = useCallback(() => {
+    if (typeof window === 'undefined') return 0.78;
+    const vh = window.innerHeight;
+    const vw = window.innerWidth;
+
+    // Mobile / Tablet stacked mode (<= 1024px)
+    if (vw <= 1024) {
+      const availableWidth = Math.min(vw - 32, CANONICAL_WIDTH);
+      return Math.min(1.0, Math.max(0.5, Math.round((availableWidth / CANONICAL_WIDTH) * 100) / 100));
+    }
+
+    // Laptop / Desktop fixed view:
+    // Available height is viewport height minus header, container paddings, indicator, and safe margins
+    const verticalDeduction = vh <= 760 ? 120 : 140;
+    const availableHeight = vh - verticalDeduction;
+    const fitScale = availableHeight / CANONICAL_HEIGHT;
+
+    // Keep scale between 55% and 100% so it comfortably fits laptop screens
+    const clamped = Math.min(1.0, Math.max(0.55, fitScale));
+    return Math.round(clamped * 100) / 100;
+  }, []);
+
+  const [scale, setScale] = useState<number>(calculateFitScale);
+
+  useEffect(() => {
+    const handleResize = () => {
+      setScale(calculateFitScale());
+    };
+
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, [calculateFitScale]);
+
+  const handleWheel = (e: React.WheelEvent) => {
+    const controls = document.querySelector('.controls-panel');
+    if (controls) {
+      controls.scrollTop += e.deltaY;
+    }
+  };
+
   return (
-    <div className="preview-area">
-      <div className="preview-indicator">Vista Previa en Vivo • Proporción 2:3</div>
-      
-      <div className="poster-canvas" id="poster" ref={posterRef}>
+    <div className="preview-area" onWheel={handleWheel}>
+      <div className="preview-indicator">
+        <span className="live-dot" />
+        <span>Vista Previa en Vivo • Proporción 2:3</span>
+      </div>
+
+      <div
+        className="poster-scaler-wrapper"
+        style={{
+          width: `${Math.round(CANONICAL_WIDTH * scale)}px`,
+          height: `${Math.round(CANONICAL_HEIGHT * scale)}px`,
+        }}
+      >
+        <div
+          className="poster-canvas"
+          id="poster"
+          ref={posterRef}
+          style={{
+            transform: `scale(${scale})`,
+            transformOrigin: 'top center',
+          }}
+        >
         {/* Artwork Layer */}
         <div className="poster-artwork">
           <img
@@ -86,5 +147,6 @@ export const PosterPreview: React.FC<PosterPreviewProps> = ({
         </div>
       </div>
     </div>
-  );
+  </div>
+);
 };
