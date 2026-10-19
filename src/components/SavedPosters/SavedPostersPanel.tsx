@@ -4,7 +4,6 @@ import {
   X,
   Plus,
   Search,
-  Calendar,
   Clock,
   Trash2,
   Copy,
@@ -177,7 +176,11 @@ export const SavedPostersPanel: React.FC<SavedPostersPanelProps> = ({
             className="btn-save-current"
             onClick={() => onSaveCurrent(false)}
             disabled={isSaving}
-            title={currentProjectId ? 'Guardar cambios en el póster actual' : 'Guardar póster actual en la colección'}
+            title={
+              currentProjectId
+                ? `Guardar cambios en ${currentMovieTitle ? `"${currentMovieTitle}"` : 'el póster actual'}`
+                : 'Guardar póster actual en la colección'
+            }
           >
             {isSaving ? (
               <Loader2 size={16} className="spin" />

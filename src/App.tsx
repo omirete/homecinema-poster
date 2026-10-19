@@ -23,7 +23,7 @@ import {
   deletePosterProject,
 } from './services/posterStorage';
 import { generatePosterThumbnail } from './services/posterExport';
-import { FolderKanban, Check, Sparkles } from 'lucide-react';
+import { FolderKanban, Sparkles } from 'lucide-react';
 import './components/Controls/Controls.css';
 import './App.css';
 

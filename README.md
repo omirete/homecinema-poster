@@ -63,3 +63,13 @@ Valida los tipos TypeScript y genera los paquetes optimizados en el directorio `
 ```bash
 npm run preview
 ```
+
+---
+
+## 🌐 Despliegue en GitHub Pages
+
+El proyecto incluye un flujo de integración y despliegue continuo mediante **GitHub Actions** (`.github/workflows/deploy.yml`).
+
+Cada `push` a la rama `main` compila y despliega automáticamente la aplicación en:
+👉 **[https://omirete.github.io/homecinema-poster/](https://omirete.github.io/homecinema-poster/)**
+
